@@ -1,0 +1,17 @@
+[
+  {
+    "image": "img/bg-showcase-1.jpg",
+    "title": "Fully Responsive Design",
+    "summary": "This theme will look great on any device, no matter the size!"
+  },
+  {
+    "image": "img/bg-showcase-2.jpg",
+    "title": "Updated For Bootstrap 4",
+    "summary": "Newly improved, and full of great utility classes, Bootstrap 4 is leading the way in mobile responsive web development! All of the themes on Start Bootstrap are now using Bootstrap 4!"
+  },
+  {
+    "image": "img/bg-showcase-3.jpg",
+    "title": "Easy to Use &amp; Customize",
+    "summary": "Landing Page is just HTML and CSS with a splash of SCSS for users who demand some deeper customization options. Out of the box, just add your content and images, and your new landing page will be ready to go!"
+  }
+]
