@@ -32,7 +32,7 @@ export default {
   components: true,
 
   // Modules for dev and build (recommended) (https://go.nuxtjs.dev/config-modules)
-  buildModules: [],
+  buildModules: ["@nuxtjs/dotenv"],
 
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
@@ -57,5 +57,6 @@ export default {
   content: {},
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
-  build: {}
+  build: {},
+  serverMiddleware: ["~/api/logger"]
 };

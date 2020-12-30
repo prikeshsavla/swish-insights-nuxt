@@ -1,12 +1,9 @@
 <template>
-  <header class="masthead ">
+  <header class="masthead">
     <div class="container">
       <div class="row">
-        <div class="col-xl-9 mx-auto">
-          <h1 class="mb-5">
-            Build a landing page for your business or project and generate more
-            leads!
-          </h1>
+        <div class="col-xl-9 mx-auto text-center">
+          <h1 class="mb-5">Discover how Google measures your website!!</h1>
         </div>
         <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
           <form @submit.prevent="run">
@@ -18,28 +15,23 @@
                   v-model="url"
                 />
               </div>
+
               <div class="col-12 col-md-3">
                 <b-button
                   variant="primary"
                   size="lg"
-                  block="true"
                   type="submit"
                   v-if="!loadingResults"
                 >
                   Run
                 </b-button>
 
-                <b-button
-                  variant="primary"
-                  size="lg"
-                  block="true"
-                  disabled
-                  v-else
-                >
+                <b-button variant="primary" size="lg" disabled v-else>
                   <b-spinner small></b-spinner>
                   <span class="sr-only">Loading...</span>
                 </b-button>
               </div>
+              <div class="col-12" v-html="errorMessage"></div>
             </div>
           </form>
         </div>
@@ -59,7 +51,6 @@
                   >Show JSON Response</b-button
                 >
                 <b-button
-                  v-b-toggle.preview
                   variant="primary"
                   size="sm"
                   :href="reportLink"
@@ -71,7 +62,7 @@
             <div class="notification" id="result"></div>
 
             <table class="table table-sm mt-4">
-              <tr v-for="(value, metric) in lighthouseMetrics">
+              <tr v-for="(value, metric) in lighthouseMetrics" :key="metric">
                 <th>{{ metric }}</th>
                 <td>{{ value }}</td>
               </tr>
@@ -91,6 +82,7 @@
 </template>
 
 <script>
+const validUrl = require("valid-url");
 export default {
   data() {
     return {
@@ -102,47 +94,53 @@ export default {
         "best-practices",
         "performance",
         "pwa",
-        "seo"
+        "seo",
       ],
       result: null,
       reportLink: "",
-      lighthouseMetrics: []
+      lighthouseMetrics: [],
     };
   },
   methods: {
+    addhttp(url) {
+      if (!/^(?:f|ht)tps?\:\/\//.test(url)) {
+        url = "http://" + url;
+      }
+      return url;
+    },
+    httpURL() {
+      return this.addhttp(this.url);
+    },
     titleize(sentence) {
       if (!sentence.split) return sentence;
-      var _titleizeWord = function(string) {
+      var _titleizeWord = function (string) {
           return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
         },
         result = [];
-      sentence.split(" ").forEach(function(w) {
+      sentence.split(" ").forEach(function (w) {
         result.push(_titleizeWord(w));
       });
       return result.join(" ");
-    },
-    isValidUrl(str) {
-      const regexp = /^(?:(?:http(s)?):\/\/)(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
-      return regexp.test(str);
     },
     run() {
       this.loadingResults = true;
       this.result = null;
       this.lighthouseMetrics = [];
-      if (!this.isValidUrl(this.url)) {
+      if (!validUrl.isUri(this.httpURL())) {
+        console.log(this.httpURL());
         this.loadingResults = false;
         this.errorMessage = "Please enter a valid URL (https://example.com)";
         return false;
       }
       this.errorMessage = "";
-      const queryUrl = this.url.replace(/\/$/, "").toLowerCase();
+      const queryUrl = this.httpURL().replace(/\/$/, "").toLowerCase();
       const url = this.setUpQuery(queryUrl);
 
       const that = this;
 
       fetch(url)
-        .then(response => response.json())
-        .then(json => {
+        .then((response) => response.json())
+        .then((json) => {
           this.showInitialContent(json.id);
           const lighthouse = json.lighthouseResult;
 
@@ -170,7 +168,7 @@ export default {
               lighthouse.audits["first-meaningful-paint"].displayValue,
             "First CPU Idle": lighthouse.audits["first-cpu-idle"].displayValue,
             "Estimated Input Latency":
-              lighthouse.audits["estimated-input-latency"].displayValue
+              lighthouse.audits["estimated-input-latency"].displayValue,
           };
 
           this.loadingResults = false;
@@ -184,23 +182,23 @@ export default {
             public: true,
             files: {
               "file.lighthouse.json": {
-                content: JSON.stringify(lighthouse, undefined, 2)
-              }
-            }
+                content: JSON.stringify(lighthouse, undefined, 2),
+              },
+            },
           });
 
           var config = {
             method: "post",
             url: "https://api.github.com/gists",
             headers: {
-              Authorization: "Bearer b5c9a2b79235c633b63b2b15be986beb2286e780",
-              "Content-Type": "application/json"
+              Authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
+              "Content-Type": "application/json",
             },
-            data: data
+            data: data,
           };
 
           this.$axios(config)
-            .then(response => {
+            .then((response) => {
               console.log(JSON.stringify(response.data.id));
               this.reportLink =
                 "https://googlechrome.github.io/lighthouse/viewer/?gist=" +
@@ -210,7 +208,7 @@ export default {
                   response.data.id
               );
             })
-            .catch(function(error) {
+            .catch(function (error) {
               console.log(error);
             });
 
@@ -233,13 +231,13 @@ export default {
 
       const parameters = {
         url: encodeURIComponent(queryUrl),
-        category: this.categories
+        category: this.categories,
       };
-      let query = `${api}?key=AIzaSyDAnEMnj6igIF_WRqL5mgzumTKWgN_zojs`;
+      let query = `${api}?key=${process.env.GOOGLE_TOKEN}`;
       for (const key in parameters) {
         if (!!parameters[key]) {
           if (Array.isArray(parameters[key])) {
-            parameters[key].forEach(element => {
+            parameters[key].forEach((element) => {
               query += `&${key}=${element}`;
             });
           } else {
@@ -263,7 +261,7 @@ export default {
         .replace(/>/g, "&gt;");
       return json.replace(
         /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
-        function(match) {
+        function (match) {
           var cls = "number";
           if (/^"/.test(match)) {
             if (/:$/.test(match)) {
@@ -279,8 +277,8 @@ export default {
           return '<span class="' + cls + '">' + match + "</span>";
         }
       );
-    }
-  }
+    },
+  },
 };
 </script>
 

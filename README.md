@@ -2,6 +2,10 @@
 
 ## Build Setup
 
+cp .env.example .env
+
+## Set Github and Google Access Keys
+
 ```bash
 # install dependencies
 $ yarn install
@@ -18,3 +22,7 @@ $ yarn generate
 ```
 
 For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
+
+Edit 
+
+
