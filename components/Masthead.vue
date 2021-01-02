@@ -191,7 +191,7 @@ export default {
             method: "post",
             url: "https://api.github.com/gists",
             headers: {
-              Authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
+              Authorization: `Bearer ${process.env.githubAccessToken}`,
               "Content-Type": "application/json",
             },
             data: data,
@@ -233,7 +233,7 @@ export default {
         url: encodeURIComponent(queryUrl),
         category: this.categories,
       };
-      let query = `${api}?key=${process.env.GOOGLE_TOKEN}`;
+      let query = `${api}?key=${process.env.googleApiToken}`;
       for (const key in parameters) {
         if (!!parameters[key]) {
           if (Array.isArray(parameters[key])) {

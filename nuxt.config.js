@@ -18,6 +18,11 @@ export default {
     ]
   },
 
+  env: {
+    githubAccessToken: process.env.GITHUB_ACCESS_TOKEN || "",
+    googleApiToken: process.env.GOOGLE_TOKEN || ""
+  },
+
   // Global CSS (https://go.nuxtjs.dev/config-css)
   css: [],
 
